@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: event_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: event_user
+      POSTGRES_PASSWORD: event_pass
+      POSTGRES_DB: eventdb
+    volumes:
+      - /root/task/data/pgdata:/var/lib/postgresql/data
+    networks:
+      - event_net
+  api:
+    build:
+      context: /root/task
+      dockerfile: Dockerfile
+    container_name: event_api
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+    working_dir: /root/task
+    volumes:
+      - /root/task:/root/task
+    networks:
+      - event_net
+networks:
+  event_net:
+    driver: bridge
